@@ -2,6 +2,7 @@ package com.gcigb.dbchain.net
 
 import com.gcigb.dbchain.bean.AccountBean
 import com.gcigb.dbchain.bean.result.DBChainResult
+import com.gcigb.dbchain.bean.result.DenomAmount
 import com.gcigb.dbchain.bean.result.QueryOperationResultBean
 import com.gcigb.dbchain.bean.result.TxHashBean
 import kotlinx.coroutines.Deferred
@@ -64,4 +65,7 @@ interface ApiService {
      */
     @GET("auth/accounts/{address}")
     fun getToken(@Path("address") address: String): Deferred<BaseResponseDbChain<AccountBean>>
+
+    @GET("dbchain/min_gas_prices/{token}")
+    fun getMinGasPrices(@Path("token") token: String):Deferred<BaseResponseDbChain<List<DenomAmount>>>
 }

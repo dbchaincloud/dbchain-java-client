@@ -44,8 +44,13 @@ data class Value(
 )
 
 data class Fee(
-    val amount: List<Any>,
+    val amount: List<DenomAmount>,
     val gas: String
+)
+
+data class DenomAmount(
+    var amount: String,
+    val denom: String
 )
 
 data class Msg(

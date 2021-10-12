@@ -18,11 +18,13 @@ class DBChain {
         lateinit var dbChainKey: DbChainKey
         lateinit var dbChainEncrypt: IDBChainEncrypt
         lateinit var iLog: ILog
+        var defaultGasNumber: Long = 200000
 
         fun init(
             appCode: String, baseUrl: String, chainId: String,
             dbChainEncrypt: IDBChainEncrypt,
             iLog: ILog,
+            defaultGasNumber: Long = 200000,
             isDebug: Boolean = false,
             testLogTag: String = "tag_test",
             errorLogTag: String = "tag_error",

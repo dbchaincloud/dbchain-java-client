@@ -11,6 +11,10 @@ import com.gcigb.dbchain.util.coding.base58Encode
 import com.gcigb.network.RetrofitClient
 import com.gcigb.network.request.RequestClient
 import com.google.gson.Gson
+import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
+import kotlin.math.ceil
 
 fun newMessageList(): MutableList<Message> = mutableListOf()
 
@@ -110,11 +114,19 @@ suspend fun querierFunction(
 /**
  * 格式化请求体
  */
-private fun formatRequestBodyJson(
+private suspend fun formatRequestBodyJson(
     msgList: List<Message>,
     accountBean: BaseResponseDbChain<AccountBean>
 ): String {
-    val tx = TxBean(msg = msgList)
+    val denomAmountList =
+        RetrofitClient.createService(DBChain.baseUrl, ApiService::class.java).getMinGasPrices(createAccessToken()).await().result
+    val gas = msgList.size * DBChain.defaultGasNumber
+    val amount = BigDecimal(denomAmountList[0].amount)
+    val multiply = amount.multiply(BigDecimal(gas)).toDouble()
+    val ceil = ceil(multiply).toLong().toString()
+    denomAmountList[0].amount = ceil
+    val fee = FeeBean(amount = denomAmountList, gas = "$gas")
+    val tx = TxBean(fee = fee, msg = msgList)
     val account = accountBean.result.value
     val signMeta = SignMetaBean(DBChain.chainId, "${account.account_number}", "${account.sequence}")
     // 签名
