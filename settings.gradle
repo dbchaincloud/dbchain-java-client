@@ -6,6 +6,6 @@ dependencyResolutionManagement {
         jcenter() // Warning: this repository is going to shut down soon
     }
 }
-rootProject.name = "dbchain-java-client"
+rootProject.name = "dbchain-java"
 include ':app'
 include ':dbchain-java-client'
