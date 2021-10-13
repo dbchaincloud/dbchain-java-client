@@ -18,6 +18,11 @@ fun createApplicationMessage(
     return Message(type = "dbchain/CreateApplication", value = messageValue)
 }
 
+fun createTableMessage(tableName: String, fields: List<String>): Message {
+    val messageValue = CreateTableMessageValue(table_name = tableName, fields = fields)
+    return Message(type = "dbchain/CreateTable", value = messageValue)
+}
+
 fun createInsertMessage(tableName: String, fields: Map<String, String>): Message {
     val json = Gson().toJson(fields)
     val base64Encode = base64Encode(json.toByteArray())
@@ -36,6 +41,13 @@ fun createCallFunctionMessage(functionName: String, argument: String): Message {
 }
 
 fun createAddFunctionMessage(functionName: String, description: String, body: String): Message {
-    val messageValue = AddFunctionMessageValue(function_name = functionName, description = description, body = body)
+    val descriptionBase64Encode = base64Encode(description.toByteArray())
+    val bodyBase64Encode = base64Encode(body.toByteArray())
+    val messageValue = AddFunctionMessageValue(function_name = functionName, description = descriptionBase64Encode, body = bodyBase64Encode)
     return Message(type = "dbchain/AddFunction", value = messageValue)
+}
+
+fun createDropFunctionMessage(functionName: String): Message {
+    val messageValue = DropFunctionMessageValue(function_name = functionName)
+    return Message(type = "dbchain/DropFunction", value = messageValue)
 }

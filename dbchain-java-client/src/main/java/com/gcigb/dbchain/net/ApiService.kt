@@ -67,5 +67,8 @@ interface ApiService {
     fun getToken(@Path("address") address: String): Deferred<BaseResponseDbChain<AccountBean>>
 
     @GET("dbchain/min_gas_prices/{token}")
-    fun getMinGasPrices(@Path("token") token: String):Deferred<BaseResponseDbChain<List<DenomAmount>>>
+    fun getMinGasPrices(@Path("token") token: String):Deferred<BaseResponseDbChain<List<DenomAmount>?>>
+
+    @GET("dbchain/application/{token}")
+    fun queryApplication(@Path("token") token: String):Deferred<BaseResponseDbChain<List<String>>>
 }

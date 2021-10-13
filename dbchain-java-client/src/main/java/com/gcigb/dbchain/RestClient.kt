@@ -33,6 +33,38 @@ suspend fun handleBatchMessage(msgList: List<Message>): Boolean {
     return checkDBChainOperactionSuccess(result)
 }
 
+suspend fun createApplication(
+    // 库名称
+    name: String,
+    // 库描述
+    description: String,
+    // 权限
+    permission_required: Boolean,
+    // 创建者地址
+    owner: String
+): Boolean {
+    val message = createApplicationMessage(name, description, permission_required, owner)
+    return handleBatchMessage(listOf(message))
+}
+
+
+suspend fun queryApplication(): List<String>? {
+    return loopHandleInCount({
+        RetrofitClient.sendRequestForReturn {
+            return@sendRequestForReturn RetrofitClient.createService(DBChain.baseUrl, ApiService::class.java)
+                .queryApplication(createAccessToken())
+                .await().result
+        }
+    }, {
+        it != null
+    })
+}
+
+suspend fun createTable(tableName: String, fields: List<String>): Boolean {
+    val message = createTableMessage(tableName, fields)
+    return handleBatchMessage(listOf(message))
+}
+
 /**
  * 插入一条数据
  */
@@ -62,6 +94,14 @@ suspend fun callFunction(functionName: String, argument: String): Boolean {
  */
 suspend fun addFunction(functionName: String, description: String, body: String): Boolean {
     val message = createAddFunctionMessage(functionName, description, body)
+    return handleBatchMessage(listOf(message))
+}
+
+/**
+ * 删除函数
+ */
+suspend fun dropFunction(functionName: String): Boolean {
+    val message = createDropFunctionMessage(functionName)
     return handleBatchMessage(listOf(message))
 }
 
@@ -121,11 +161,13 @@ private suspend fun formatRequestBodyJson(
     val denomAmountList =
         RetrofitClient.createService(DBChain.baseUrl, ApiService::class.java).getMinGasPrices(createAccessToken()).await().result
     val gas = msgList.size * DBChain.defaultGasNumber
-    val amount = BigDecimal(denomAmountList[0].amount)
-    val multiply = amount.multiply(BigDecimal(gas)).toDouble()
-    val ceil = ceil(multiply).toLong().toString()
-    denomAmountList[0].amount = ceil
-    val fee = FeeBean(amount = denomAmountList, gas = "$gas")
+    if (denomAmountList != null && denomAmountList.isNotEmpty()) {
+        val amount = BigDecimal(denomAmountList[0].amount)
+        val multiply = amount.multiply(BigDecimal(gas)).toDouble()
+        val ceil = ceil(multiply).toLong().toString()
+        denomAmountList[0].amount = ceil
+    }
+    val fee = FeeBean(amount = denomAmountList ?: listOf(), gas = "$gas")
     val tx = TxBean(fee = fee, msg = msgList)
     val account = accountBean.result.value
     val signMeta = SignMetaBean(DBChain.chainId, "${account.account_number}", "${account.sequence}")

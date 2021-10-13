@@ -65,7 +65,7 @@ data class Signature(
 
 data class ValueX(
     val app_code: String,
-    val fields: String,
+    val fields: Any,
     val owner: String,
     val table_name: String
 )
