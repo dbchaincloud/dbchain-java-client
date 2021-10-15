@@ -9,14 +9,14 @@ class MnemonicClient {
         fun generateMnemonic(): DbChainKey {
             var dbChainKey: DbChainKey
             do {
-                dbChainKey = Wallet.generateMnemonic("walletName", "walletPassword")
+                dbChainKey = Wallet.generateMnemonic()
             } while (dbChainKey.publicKey64.length != 128)
             return dbChainKey
         }
 
         // 导入助记词，获取 DbChainKey
         fun importMnemonic(list: List<String>): DbChainKey {
-            return Wallet.importMnemonic(list, "walletPassword")
+            return Wallet.importMnemonic(list)
         }
 
         fun mnemonic2list(mnemonic: String?): List<String> {

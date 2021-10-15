@@ -11,7 +11,7 @@ afterEvaluate {
                 from(components["kotlin"])
                 groupId = 'com.github.dbchaincloud'
                 artifactId = 'dbchain-java-client'
-                version = '1.0.0'
+                version = '1.0.3'
             }
         }
     }
