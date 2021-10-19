@@ -2,6 +2,7 @@ package com.gcigb.dbchain
 
 import com.gcigb.network.NetworkLib
 import okhttp3.Interceptor
+import dbchain.java.client.base.IDBChainEncrypt
 
 
 /**
