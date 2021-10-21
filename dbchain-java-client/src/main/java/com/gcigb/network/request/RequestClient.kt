@@ -1,6 +1,7 @@
 package com.gcigb.network.request
 
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 
 /**
@@ -10,7 +11,7 @@ import okhttp3.RequestBody
 class RequestClient {
     companion object {
         fun getJsonRequestBody(json: String): RequestBody {
-            return RequestBody.create(MediaType.parse("application/json"), json)
+            return RequestBody.create("application/json".toMediaTypeOrNull(), json)
         }
     }
 }
