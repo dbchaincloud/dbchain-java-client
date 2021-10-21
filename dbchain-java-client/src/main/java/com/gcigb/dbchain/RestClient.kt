@@ -11,6 +11,8 @@ import com.gcigb.dbchain.util.coding.base58Encode
 import com.gcigb.network.RetrofitClient
 import com.gcigb.network.request.RequestClient
 import com.google.gson.Gson
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
@@ -187,7 +189,8 @@ private suspend inline fun createTransaction(
         // 组装请求数据
         val broadcastBody = block(accountBean)
         // 插入成功返回的哈希
-        val txHashBean = apiService.insertAsync(RequestClient.getJsonRequestBody(broadcastBody)).await()
+        val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), broadcastBody)
+        val txHashBean = apiService.insertAsync(requestBody).await()
         return@sendRequestForReturn loopHandleInTime({
             RetrofitClient.sendRequestForReturn inner@{
                 return@inner apiService.restGetAsync(txHashBean.txhash).await()
