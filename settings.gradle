@@ -8,5 +8,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "dbchain-java"
-include ':app'
 include ':dbchain-java-client'
