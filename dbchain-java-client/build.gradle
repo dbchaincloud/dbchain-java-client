@@ -26,7 +26,7 @@ dependencies {
     // Kotlin
     api "org.jetbrains.kotlin:kotlin-stdlib:1.4.0"
     api "androidx.core:core-ktx:1.3.2"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9"
+    api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
     // Json
     implementation "com.google.code.gson:gson:2.8.6"
     // Network
