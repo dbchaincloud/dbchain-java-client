@@ -33,5 +33,5 @@ dependencies {
     api "com.squareup.retrofit2:retrofit:2.9.0"
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
     api "org.web3j:core:4.6.3"
-    implementation 'com.github.dbchaincloud:dbchain-java-abstract-lib:v1.0.1'
+    implementation 'com.github.dbchaincloud:dbchain-java-abstract-lib:v1.0.2'
 }
