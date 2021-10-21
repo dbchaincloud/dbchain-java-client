@@ -1,8 +1,8 @@
 package com.gcigb.dbchain.cosmossig
 
-import com.gcigb.dbchain.DBChain.Companion.dbChainEncrypt
 import com.gcigb.dbchain.DbChainKey
 import com.gcigb.dbchain.bean.*
+import com.gcigb.dbchain.dbChainEncrypt
 import com.gcigb.dbchain.ktx.toJsonSort
 import com.gcigb.dbchain.util.coding.base64Encode
 import com.gcigb.network.util.logHttp
@@ -62,5 +62,5 @@ private fun toCanonicalJSONBytes(any: Any): ByteArray {
  * 先哈希，再 secp256k1 签名
  */
 internal fun sign(bytes: ByteArray, privateKeyByteArray: ByteArray): ByteArray {
-    return dbChainEncrypt.sign(privateKeyByteArray,bytes)
+    return dbChainEncrypt.sign(privateKeyByteArray, bytes)
 }

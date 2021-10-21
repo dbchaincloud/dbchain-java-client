@@ -1,9 +1,9 @@
 package com.gcigb.network.util
 
-import com.gcigb.dbchain.DBChain.Companion.iLog
-import com.gcigb.network.NetworkLib.Companion.DEBUG
-import com.gcigb.network.NetworkLib.Companion.TAG_ERROR
-import com.gcigb.network.NetworkLib.Companion.TAG_TEST
+import com.gcigb.dbchain.iLog
+import com.gcigb.network.DEBUG
+import com.gcigb.network.TAG_ERROR
+import com.gcigb.network.TAG_TEST
 import com.google.gson.Gson
 
 /**

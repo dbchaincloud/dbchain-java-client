@@ -1,7 +1,6 @@
 package com.gcigb.dbchain.util;
 
-import static com.gcigb.dbchain.DBChain.dbChainEncrypt;
-
+import com.gcigb.dbchain.DBChainKt;
 import com.gcigb.dbchain.DbChainKey;
 import com.gcigb.dbchain.util.coding.HexUtil;
 
@@ -62,11 +61,11 @@ public class Wallet {
     }
 
     /**
-     * @param ds         助记词加密种子
-     * @param pathArray  助记词标准
+     * @param ds        助记词加密种子
+     * @param pathArray 助记词标准
      */
     @NotNull
-    private static DbChainKey generateWalletByMnemonic( DeterministicSeed ds, String[] pathArray) {
+    private static DbChainKey generateWalletByMnemonic(DeterministicSeed ds, String[] pathArray) {
         //种子
         byte[] seedBytes = ds.getSeedBytes();
         //助记词
@@ -88,9 +87,9 @@ public class Wallet {
         }
         String mnemonicValue = convertMnemonicList(mnemonic);
         String privateKey32Hex = dkKey.getPrivateKeyAsHex();
-        byte[] publicKey33Bytes = dbChainEncrypt.generatePublicKey33ByPrivateKey(dkKey.getPrivKeyBytes(), dkKey);
-        byte[] publicKey64Bytes = dbChainEncrypt.generatePublicKey64ByPrivateKey(dkKey.getPrivKeyBytes(), dkKey);
-        String address = dbChainEncrypt.generateAddressByPublicKeyByteArray33(publicKey33Bytes);
+        byte[] publicKey33Bytes = DBChainKt.dbChainEncrypt.generatePublicKey33ByPrivateKey(dkKey.getPrivKeyBytes(), dkKey);
+        byte[] publicKey64Bytes = DBChainKt.dbChainEncrypt.generatePublicKey64ByPrivateKey(dkKey.getPrivKeyBytes(), dkKey);
+        String address = DBChainKt.dbChainEncrypt.generateAddressByPublicKeyByteArray33(publicKey33Bytes);
         //创建我们需要的信息
         return new DbChainKey(
                 mnemonicValue,

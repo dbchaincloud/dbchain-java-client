@@ -1,7 +1,6 @@
 package com.gcigb.dbchain.bean
 
-import com.gcigb.dbchain.DBChain.Companion.dbChainEncrypt
-
+import com.gcigb.dbchain.dbChainEncrypt
 
 /**
  * @author: Xiao Bo

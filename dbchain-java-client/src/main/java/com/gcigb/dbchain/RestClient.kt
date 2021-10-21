@@ -8,7 +8,8 @@ import com.gcigb.dbchain.cosmossig.signTx
 import com.gcigb.dbchain.net.ApiService
 import com.gcigb.dbchain.net.BaseResponseDbChain
 import com.gcigb.dbchain.util.coding.base58Encode
-import com.gcigb.network.RetrofitClient
+import com.gcigb.network.createService
+import com.gcigb.network.sendRequestForReturn
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
@@ -49,8 +50,8 @@ suspend fun createApplication(
 
 suspend fun queryApplication(): List<String> {
     val result = loopHandleInCount({
-        RetrofitClient.sendRequestForReturn {
-            return@sendRequestForReturn RetrofitClient.createService(DBChain.baseUrl, ApiService::class.java)
+        sendRequestForReturn {
+            return@sendRequestForReturn createService(baseUrl, ApiService::class.java)
                 .queryApplication(createAccessToken())
                 .await().result
         }
@@ -110,10 +111,10 @@ suspend fun dropFunction(functionName: String): Boolean {
  */
 suspend fun querier(queriedArray: QueriedArray): DBChainQueryResult {
     val body = loopHandleInCount({
-        RetrofitClient.sendRequestForReturn {
+        sendRequestForReturn {
             val json = queriedArray.toJson()
-            return@sendRequestForReturn RetrofitClient.createService(DBChain.baseUrl, ApiService::class.java)
-                .querier(createAccessToken(), DBChain.appCode, base58Encode(json.toByteArray()))
+            return@sendRequestForReturn createService(baseUrl, ApiService::class.java)
+                .querier(createAccessToken(), appCode, base58Encode(json.toByteArray()))
                 .await()
         }
     }, {
@@ -126,13 +127,13 @@ suspend fun querier(queriedArray: QueriedArray): DBChainQueryResult {
  * 查询数据的自定义函数
  */
 suspend fun querierFunction(
-    appCode: String = DBChain.appCode,
+    apC: String = appCode,
     function_name: String,
     queriedArray: QueriedArray,
     vararg parmas: String
 ): DBChainQueryResult {
     val body = loopHandleInCount({
-        RetrofitClient.sendRequestForReturn {
+        sendRequestForReturn {
             val json = queriedArray.toJson()
             val sb = StringBuilder()
             val queriedArrayEncode = base58Encode(json.toByteArray())
@@ -141,8 +142,8 @@ suspend fun querierFunction(
                 sb.append("/")
                 base58Encode(it.toByteArray())
             }
-            return@sendRequestForReturn RetrofitClient.createService(DBChain.baseUrl, ApiService::class.java)
-                .querierFunction(createAccessToken(), appCode, function_name, base58Encode(sb.toString().toByteArray()))
+            return@sendRequestForReturn createService(baseUrl, ApiService::class.java)
+                .querierFunction(createAccessToken(), apC, function_name, base58Encode(sb.toString().toByteArray()))
                 .await()
         }
     }, {
@@ -159,8 +160,8 @@ private suspend fun formatRequestBodyJson(
     accountBean: BaseResponseDbChain<AccountBean>
 ): String {
     val denomAmountList =
-        RetrofitClient.createService(DBChain.baseUrl, ApiService::class.java).getMinGasPrices(createAccessToken()).await().result
-    val gas = msgList.size * DBChain.defaultGasNumber
+        createService(baseUrl, ApiService::class.java).getMinGasPrices(createAccessToken()).await().result
+    val gas = msgList.size * defaultGasNumber
     if (denomAmountList != null && denomAmountList.isNotEmpty()) {
         val amount = BigDecimal(denomAmountList[0].amount)
         val multiply = amount.multiply(BigDecimal(gas)).toDouble()
@@ -170,26 +171,26 @@ private suspend fun formatRequestBodyJson(
     val fee = FeeBean(amount = denomAmountList ?: listOf(), gas = "$gas")
     val tx = TxBean(fee = fee, msg = msgList)
     val account = accountBean.result.value
-    val signMeta = SignMetaBean(DBChain.chainId, "${account.account_number}", "${account.sequence}")
+    val signMeta = SignMetaBean(chainId, "${account.account_number}", "${account.sequence}")
     // 签名
-    val signedTx = signTx(tx, signMeta, DBChain.dbChainKey)
+    val signedTx = signTx(tx, signMeta, dbChainKey)
     return Gson().toJson(BodyBean(tx = signedTx))
 }
 
 private suspend inline fun createTransaction(
     block: (accountBean: BaseResponseDbChain<AccountBean>) -> String
 ): QueryOperationResultBean? {
-    return RetrofitClient.sendRequestForReturn {
-        val apiService = RetrofitClient.createService(DBChain.baseUrl, ApiService::class.java)
+    return sendRequestForReturn {
+        val apiService = createService(baseUrl, ApiService::class.java)
         // 获取account
-        val accountBean = apiService.getAccountAsync(DBChain.dbChainKey.address).await()
+        val accountBean = apiService.getAccountAsync(dbChainKey.address).await()
         // 组装请求数据
         val broadcastBody = block(accountBean)
         // 插入成功返回的哈希
         val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), broadcastBody)
         val txHashBean = apiService.insertAsync(requestBody).await()
         return@sendRequestForReturn loopHandleInTime({
-            RetrofitClient.sendRequestForReturn inner@{
+            sendRequestForReturn inner@{
                 return@inner apiService.restGetAsync(txHashBean.txhash).await()
             }
         }, {

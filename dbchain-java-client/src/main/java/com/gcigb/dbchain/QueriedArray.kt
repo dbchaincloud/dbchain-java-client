@@ -8,6 +8,13 @@ import com.google.gson.Gson
  * @date: 16/10/2020
  * 组装查询语句
  */
+
+const val OPERATOR_EQUAL = "="
+const val OPERATOR_LESS = "<"
+const val OPERATOR_LARGER = ">"
+const val OPERATOR_LESS_AND_EQUAL = "<="
+const val OPERATOR_LARGER_AND_EQUAL = ">="
+
 class QueriedArray(method: String = "table", table: String) :
     ArrayList<BaseQuerier>() {
 
@@ -82,14 +89,6 @@ class QueriedArray(method: String = "table", table: String) :
     }
 
     fun toJson(): String = Gson().toJson(this)
-
-    companion object {
-        const val OPERATOR_EQUAL = "="
-        const val OPERATOR_LESS = "<"
-        const val OPERATOR_LARGER = ">"
-        const val OPERATOR_LESS_AND_EQUAL = "<="
-        const val OPERATOR_LARGER_AND_EQUAL = ">="
-    }
 }
 
 abstract class BaseQuerier {

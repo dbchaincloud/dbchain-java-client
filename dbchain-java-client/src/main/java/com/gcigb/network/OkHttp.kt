@@ -1,7 +1,5 @@
 package com.gcigb.network
 
-import com.gcigb.network.NetworkLib.Companion.DEBUG
-import com.gcigb.network.NetworkLib.Companion.interceptorList
 import com.gcigb.network.interceptor.LogInterceptor
 import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
