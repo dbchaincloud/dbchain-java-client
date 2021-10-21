@@ -48,8 +48,8 @@ suspend fun createApplication(
 }
 
 
-suspend fun queryApplication(): List<String>? {
-    return loopHandleInCount({
+suspend fun queryApplication(): List<String> {
+    val result = loopHandleInCount({
         RetrofitClient.sendRequestForReturn {
             return@sendRequestForReturn RetrofitClient.createService(DBChain.baseUrl, ApiService::class.java)
                 .queryApplication(createAccessToken())
@@ -58,6 +58,7 @@ suspend fun queryApplication(): List<String>? {
     }, {
         it != null
     })
+    return result ?: listOf()
 }
 
 suspend fun createTable(tableName: String, fields: List<String>): Boolean {
