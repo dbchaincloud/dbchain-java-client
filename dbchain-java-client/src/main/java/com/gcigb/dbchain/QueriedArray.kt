@@ -1,6 +1,5 @@
 package com.gcigb.dbchain
 
-import androidx.annotation.StringDef
 import com.google.gson.Gson
 
 /**
@@ -22,12 +21,6 @@ class QueriedArray(method: String = "table", table: String) :
         add(TableQuerier(method, table))
     }
 
-    /** @hide
-     */
-    @StringDef(value = [OPERATOR_EQUAL, OPERATOR_LESS, OPERATOR_LESS_AND_EQUAL, OPERATOR_LARGER, OPERATOR_LARGER_AND_EQUAL])
-    @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
-    annotation class Operator
-
     fun findCreatedBy(address: String): QueriedArray {
         return findEqual("created_by", address)
     }
@@ -35,7 +28,7 @@ class QueriedArray(method: String = "table", table: String) :
     /**
      * 操作符：=、<、>、<=、>=
      */
-    fun findWhere(field: String, value: String, @Operator operator: String): QueriedArray {
+    fun findWhere(field: String, value: String, operator: String): QueriedArray {
         val queried = FieldQuerier("where", field, value, operator)
         add(queried)
         return this
