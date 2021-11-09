@@ -159,8 +159,9 @@ private suspend fun formatRequestBodyJson(
     msgList: List<Message>,
     accountBean: BaseResponseDbChain<AccountBean>
 ): String {
-    val denomAmountList =
+    val denomAmountList = sendRequestForReturn {
         createService(baseUrl, ApiService::class.java).getMinGasPrices(createAccessToken()).await().result
+    }
     val gas = msgList.size * defaultGasNumber
     if (denomAmountList != null && denomAmountList.isNotEmpty()) {
         val amount = BigDecimal(denomAmountList[0].amount)
