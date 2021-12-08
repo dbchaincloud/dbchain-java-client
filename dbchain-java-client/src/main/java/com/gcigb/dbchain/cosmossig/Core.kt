@@ -1,6 +1,5 @@
 package com.gcigb.dbchain.cosmossig
 
-import com.gcigb.dbchain.DbChainKey
 import com.gcigb.dbchain.bean.*
 import com.gcigb.dbchain.dbChainEncrypt
 import com.gcigb.dbchain.ktx.toJsonSort
@@ -13,9 +12,9 @@ import com.gcigb.network.util.logHttp
  * @date: 9/10/2020
  */
 
-internal fun signTx(tx: TxBean, meta: SignMetaBean, dbChainKey: DbChainKey): TxBean {
+internal fun signTx(tx: TxBean, meta: SignMetaBean, privateKeyBytes: ByteArray, publicKeyBytes33: ByteArray): TxBean {
     val signMsg = createSignMsg(tx, meta)
-    val signature = createSignature(signMsg, dbChainKey)
+    val signature = createSignature(signMsg, privateKeyBytes, publicKeyBytes33)
     tx.signatures.add(signature)
     return tx
 }
@@ -37,10 +36,10 @@ private fun createSignMsg(tx: TxBean, meta: SignMetaBean): SignMsgBean {
 /**
  * 创建签名实体
  */
-private fun createSignature(signMsg: SignMsgBean, dbChainKey: DbChainKey): SignatureBean {
-    val signatureObj = createSignatureBytes(signMsg, dbChainKey.privateKeyBytes)
+private fun createSignature(signMsg: SignMsgBean, privateKeyBytes: ByteArray, publicKeyBytes33: ByteArray): SignatureBean {
+    val signatureObj = createSignatureBytes(signMsg, privateKeyBytes)
     val signature = base64Encode(signatureObj)
-    val value = base64Encode(dbChainKey.publicKeyBytes33)
+    val value = base64Encode(publicKeyBytes33)
     return SignatureBean(
         signature,
         PublicKeyBean(value = value)

@@ -18,36 +18,41 @@ fun createApplicationMessage(
     return Message(type = "dbchain/CreateApplication", value = messageValue)
 }
 
-fun createTableMessage(tableName: String, fields: List<String>): Message {
-    val messageValue = CreateTableMessageValue(table_name = tableName, fields = fields)
+fun createTableMessage(tableName: String, fields: List<String>, owner: String): Message {
+    val messageValue = CreateTableMessageValue(table_name = tableName, fields = fields, owner = owner)
     return Message(type = "dbchain/CreateTable", value = messageValue)
 }
 
-fun createInsertMessage(tableName: String, fields: Map<String, String>): Message {
+fun createInsertMessage(tableName: String, fields: Map<String, String>, owner: String): Message {
     val json = Gson().toJson(fields)
     val base64Encode = base64Encode(json.toByteArray())
-    val messageValue = InsertMessageValue(table_name = tableName, fields = base64Encode)
+    val messageValue = InsertMessageValue(table_name = tableName, fields = base64Encode, owner = owner)
     return Message(type = "dbchain/InsertRow", value = messageValue)
 }
 
-fun createFreezeMessage(tableName: String, id: String): Message {
-    val messageValue = FreezeMessageValue(table_name = tableName, id = id)
+fun createFreezeMessage(tableName: String, id: String, owner: String): Message {
+    val messageValue = FreezeMessageValue(table_name = tableName, id = id, owner = owner)
     return Message(type = "dbchain/FreezeRow", value = messageValue)
 }
 
-fun createCallFunctionMessage(functionName: String, argument: String): Message {
-    val messageValue = CallFunctionMessageValue(function_name = functionName, argument = argument)
+fun createCallFunctionMessage(functionName: String, argument: String, owner: String): Message {
+    val messageValue = CallFunctionMessageValue(function_name = functionName, argument = argument, owner = owner)
     return Message(type = "dbchain/CallFunction", value = messageValue)
 }
 
-fun createAddFunctionMessage(functionName: String, description: String, body: String): Message {
+fun createAddFunctionMessage(functionName: String, description: String, body: String, owner: String): Message {
     val descriptionBase64Encode = base64Encode(description.toByteArray())
     val bodyBase64Encode = base64Encode(body.toByteArray())
-    val messageValue = AddFunctionMessageValue(function_name = functionName, description = descriptionBase64Encode, body = bodyBase64Encode)
+    val messageValue = AddFunctionMessageValue(
+        function_name = functionName,
+        description = descriptionBase64Encode,
+        body = bodyBase64Encode,
+        owner = owner
+    )
     return Message(type = "dbchain/AddFunction", value = messageValue)
 }
 
-fun createDropFunctionMessage(functionName: String): Message {
-    val messageValue = DropFunctionMessageValue(function_name = functionName)
+fun createDropFunctionMessage(functionName: String, owner: String): Message {
+    val messageValue = DropFunctionMessageValue(function_name = functionName, owner = owner)
     return Message(type = "dbchain/DropFunction", value = messageValue)
 }

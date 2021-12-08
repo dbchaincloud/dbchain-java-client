@@ -22,7 +22,7 @@ internal data class CreateTableMessageValue(
     //插入字段
     val fields: List<String>,
     //用户地址
-    val owner: String = dbChainKey.address,
+    val owner: String,
     //插入数据的表名称
     val table_name: String
 ) : BaseMessageValue()
@@ -33,7 +33,7 @@ internal data class InsertMessageValue(
     //插入字段
     val fields: String,
     //用户地址
-    val owner: String = dbChainKey.address,
+    val owner: String,
     //插入数据的表名称
     val table_name: String
 ) : BaseMessageValue()
@@ -44,7 +44,7 @@ internal data class FreezeMessageValue(
     //插入字段
     val id: String,
     //用户地址
-    val owner: String = dbChainKey.address,
+    val owner: String,
     //插入数据的表名称
     val table_name: String
 ) : BaseMessageValue()
@@ -59,7 +59,7 @@ internal data class AddFunctionMessageValue(
     //创建的函数名称
     val function_name: String,
     //用户地址
-    val owner: String = dbChainKey.address
+    val owner: String
 ) : BaseMessageValue()
 
 internal data class CallFunctionMessageValue(
@@ -70,7 +70,7 @@ internal data class CallFunctionMessageValue(
     //调用的函数名称
     val function_name: String,
     //用户地址
-    val owner: String = dbChainKey.address
+    val owner: String
 ) : BaseMessageValue()
 
 internal data class DropFunctionMessageValue(
@@ -79,5 +79,5 @@ internal data class DropFunctionMessageValue(
     //函数名称
     val function_name: String,
     //用户地址
-    val owner: String = dbChainKey.address
+    val owner: String
 ) : BaseMessageValue()
