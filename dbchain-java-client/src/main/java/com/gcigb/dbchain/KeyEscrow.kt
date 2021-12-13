@@ -11,79 +11,83 @@ object KeyEscrow {
     private val HASH_SUFFIX_SECRET = "secret".toByteArray()
     private val HASH_SUFFIX_PRIVATE = "private".toByteArray()
 
-    fun createAndSave(userName: String, password: String, privateKeyDB: IPrivateKeyDB): Boolean {
-        return save(
-            seed = randomSeed(),
+    fun createAndSavePrivateKeyWithPassword(userName: String, password: String, privateKeyDB: IPrivateKeyDB): Boolean {
+        return savePrivateKey(
             userName = userName.toByteArray(),
-            var2 = password.toByteArray(),
+            passwordOrRecoverWord = password.toByteArray(),
             privateKey = generateMnemonic().privateKeyBytes,
             privateKeyDB = privateKeyDB
         )
     }
 
-    fun savePassword(userName: String, password: String, privateKey: ByteArray, privateKeyDB: IPrivateKeyDB): Boolean {
-        return save(
-            seed = randomSeed(),
-            userName = userName.toByteArray(),
-            var2 = password.toByteArray(),
-            privateKey = privateKey,
-            privateKeyDB = privateKeyDB
-        )
-    }
-
-    fun saveRecoverWord(userName: String, recoverWord: String, privateKey: ByteArray, privateKeyDB: IPrivateKeyDB): Boolean {
-        return save(
-            seed = randomSeed(),
-            userName = userName.toByteArray(),
-            var2 = recoverWord.toByteArray(),
-            privateKey = privateKey,
-            privateKeyDB = privateKeyDB
-        )
-    }
-
-    fun forgetPassword(userName: String, recoverWord: String, newPassword: String, privateKeyDB: IPrivateKeyDB): Boolean {
-        val privateKey = loadPrivateKey(userName, recoverWord, privateKeyDB) ?: throw NullPointerException("Invalid recoverWord !!!")
-        return savePassword(userName, newPassword, privateKey, privateKeyDB)
-    }
-
-    fun resetPassword(userName: String, oldPassword: String, newPassword: String, privateKeyDB: IPrivateKeyDB): Boolean {
-        val privateKey = loadPrivateKey(userName, oldPassword, privateKeyDB) ?: throw NullPointerException("Invalid oldPassword !!!")
-        return savePassword(userName, newPassword, privateKey, privateKeyDB)
-    }
-
     fun loadPrivateKeyByPassword(userName: String, password: String, privateKeyDB: IPrivateKeyDB): ByteArray? {
-        return loadPrivateKey(userName, password, privateKeyDB)
+        return loadPrivateKey(
+            userName = userName.toByteArray(),
+            passwordOrRecoverWord = password.toByteArray(),
+            privateKeyDB = privateKeyDB
+        )
+    }
+
+    fun savePrivateKeyWithRecoverWord(userName: String, recoverWord: String, privateKey: ByteArray, privateKeyDB: IPrivateKeyDB): Boolean {
+        return savePrivateKey(
+            userName = userName.toByteArray(),
+            passwordOrRecoverWord = recoverWord.toByteArray(),
+            privateKey = privateKey,
+            privateKeyDB = privateKeyDB
+        )
     }
 
     fun loadPrivateKeyByRecoverWord(userName: String, recoverWord: String, privateKeyDB: IPrivateKeyDB): ByteArray? {
-        return loadPrivateKey(userName, recoverWord, privateKeyDB)
-    }
-
-    private fun loadPrivateKey(userName: String, var2: String, privateKeyDB: IPrivateKeyDB): ByteArray? {
-        return load(
+        return loadPrivateKey(
             userName = userName.toByteArray(),
-            var2 = var2.toByteArray(),
+            passwordOrRecoverWord = recoverWord.toByteArray(),
             privateKeyDB = privateKeyDB
         )
     }
 
-    private fun save(seed: ByteArray, userName: ByteArray, var2: ByteArray, privateKey: ByteArray, privateKeyDB: IPrivateKeyDB): Boolean {
-        val encryptPrivateKey = AESEncrypt.encrypt(f1(seed, var2), privateKey)
-        val secret = AESEncrypt.encrypt(f2(userName, var2), seed)
-        val keySaveSecret = hash1(userName, var2)
-        val keySavePrivate = hash2(userName, var2)
-        return privateKeyDB.saveEncryptPrivateKey(keySavePrivate, encryptPrivateKey)
-                &&
-                privateKeyDB.saveSecret(keySaveSecret, secret)
+    fun resetPasswordFromRecoverWord(userName: String, recoverWord: String, newPassword: String, privateKeyDB: IPrivateKeyDB): Boolean {
+        val privateKey = loadPrivateKey(userName.toByteArray(), recoverWord.toByteArray(), privateKeyDB)
+            ?: throw NullPointerException("Invalid recoverWord !!!")
+        return savePrivateKey(
+            userName = userName.toByteArray(),
+            passwordOrRecoverWord = newPassword.toByteArray(),
+            privateKey = privateKey,
+            privateKeyDB = privateKeyDB
+        )
     }
 
-    private fun load(userName: ByteArray, var2: ByteArray, privateKeyDB: IPrivateKeyDB): ByteArray? {
-        val keySaveSecret = hash1(userName, var2)
-        val keySavePrivate = hash2(userName, var2)
-        val secret = privateKeyDB.loadSecret(keySaveSecret) ?: return null
-        val encryptPrivateKey = privateKeyDB.loadSecret(keySavePrivate) ?: return null
-        val seed = AESEncrypt.decrypt(f2(userName, var2), secret)
-        return AESEncrypt.decrypt(f1(seed, var2), encryptPrivateKey)
+    fun resetPasswordFromOld(userName: String, oldPassword: String, newPassword: String, privateKeyDB: IPrivateKeyDB): Boolean {
+        val privateKey = loadPrivateKey(userName.toByteArray(), oldPassword.toByteArray(), privateKeyDB)
+            ?: throw NullPointerException("Invalid oldPassword !!!")
+        return savePrivateKey(
+            userName = userName.toByteArray(),
+            passwordOrRecoverWord = newPassword.toByteArray(),
+            privateKey = privateKey,
+            privateKeyDB = privateKeyDB
+        )
+    }
+
+    private fun savePrivateKey(
+        userName: ByteArray,
+        passwordOrRecoverWord: ByteArray,
+        privateKey: ByteArray,
+        privateKeyDB: IPrivateKeyDB
+    ): Boolean {
+        val seed = randomSeed()
+        val encryptedPrivateKey = AESEncrypt.encrypt(f1(seed, passwordOrRecoverWord), privateKey)
+        val secret = AESEncrypt.encrypt(f2(userName, passwordOrRecoverWord), seed)
+        val keyOfSecret = hash1(userName, passwordOrRecoverWord)
+        val keyOfPrivate = hash2(userName, passwordOrRecoverWord)
+        return privateKeyDB.saveEncryptedPrivateKey(keyOfPrivate, encryptedPrivateKey) && privateKeyDB.saveSecret(keyOfSecret, secret)
+    }
+
+    private fun loadPrivateKey(userName: ByteArray, passwordOrRecoverWord: ByteArray, privateKeyDB: IPrivateKeyDB): ByteArray? {
+        val keyOfSecret = hash1(userName, passwordOrRecoverWord)
+        val keyOfPrivate = hash2(userName, passwordOrRecoverWord)
+        val secret = privateKeyDB.loadSecret(keyOfSecret) ?: return null
+        val encryptedPrivateKey = privateKeyDB.loadEncryptedPrivateKey(keyOfPrivate) ?: return null
+        val seed = AESEncrypt.decrypt(f2(userName, passwordOrRecoverWord), secret)
+        return AESEncrypt.decrypt(f1(seed, passwordOrRecoverWord), encryptedPrivateKey)
     }
 
     private fun f1(var1: ByteArray, var2: ByteArray): ByteArray = hash256(var1.addByteArray(var2)).subBefore(SY_KEY_SIZE)
@@ -98,11 +102,9 @@ object KeyEscrow {
 }
 
 interface IPrivateKeyDB {
-    fun saveEncryptPrivateKey(key: ByteArray, encryptPrivateKeyByteArray: ByteArray): Boolean
+    fun saveEncryptedPrivateKey(key: ByteArray, encryptedPrivateKeyByteArray: ByteArray): Boolean
+    fun loadEncryptedPrivateKey(key: ByteArray): ByteArray?
 
     fun saveSecret(key: ByteArray, secret: ByteArray): Boolean
-
-    fun loadEncryptPrivateKey(key: ByteArray): ByteArray?
-
     fun loadSecret(key: ByteArray): ByteArray?
 }
