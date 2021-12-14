@@ -7,7 +7,7 @@ import com.gcigb.dbchain.util.subBefore
 
 object KeyEscrow {
 
-    private const val SY_KEY_SIZE = 16
+    private const val SY_KEY_SIZE = 32
     private val HASH_SUFFIX_SECRET = "secret".toByteArray()
     private val HASH_SUFFIX_PRIVATE = "private".toByteArray()
 

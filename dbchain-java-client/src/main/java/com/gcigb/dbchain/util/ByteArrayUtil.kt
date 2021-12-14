@@ -13,3 +13,10 @@ fun ByteArray.subBefore(length: Int): ByteArray {
     System.arraycopy(this, 0, result, 0, length)
     return result
 }
+
+fun ByteArray.subAfter(afterIndex: Int): ByteArray {
+    if (this.size <= afterIndex) return this
+    val result = ByteArray(size - afterIndex)
+    System.arraycopy(this, afterIndex, result, 0, result.size)
+    return result
+}
