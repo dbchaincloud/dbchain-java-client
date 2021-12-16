@@ -17,12 +17,6 @@ object AESEncrypt {
         return SecureRandom().generateSeed(numBytes)
     }
 
-    fun generateKey(seed: ByteArray): ByteArray {
-        val keyGen = KeyGenerator.getInstance("AES")
-        keyGen.init(SecureRandom(seed))
-        return keyGen.generateKey().encoded
-    }
-
     fun encrypt(key: ByteArray, input: ByteArray): ByteArray {
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
         val keySpec = SecretKeySpec(key, "AES")
