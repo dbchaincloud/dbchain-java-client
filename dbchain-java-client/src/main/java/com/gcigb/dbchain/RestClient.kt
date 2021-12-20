@@ -21,7 +21,7 @@ fun newMessageList(): MutableList<Message> = mutableListOf()
 /**
  * 批量操作
  */
-suspend fun handleBatchMessage(
+fun handleBatchMessage(
     msgList: List<Message>,
     privateKeyBytes: ByteArray = dbChainKey.privateKeyBytes,
     publicKeyBytes33: ByteArray = dbChainKey.publicKeyBytes33,
@@ -43,7 +43,7 @@ suspend fun handleBatchMessage(
     return checkDBChainOperactionSuccess(result)
 }
 
-suspend fun createApplication(
+fun createApplication(
     // 库名称
     name: String,
     // 库描述
@@ -67,7 +67,7 @@ suspend fun createApplication(
 }
 
 
-suspend fun queryApplication(
+fun queryApplication(
     privateKeyBytes: ByteArray = dbChainKey.privateKeyBytes,
     publicKeyBytes33: ByteArray = dbChainKey.publicKeyBytes33
 ): List<String> {
@@ -75,7 +75,7 @@ suspend fun queryApplication(
         sendRequestForReturn {
             return@sendRequestForReturn createService(baseUrl, ApiService::class.java)
                 .queryApplication(createAccessToken(privateKeyBytes, publicKeyBytes33))
-                .await().result
+                .execute().body()?.result
         }
     }, {
         it != null
@@ -83,7 +83,7 @@ suspend fun queryApplication(
     return result ?: listOf()
 }
 
-suspend fun createTable(
+fun createTable(
     tableName: String,
     fields: List<String>,
     privateKeyBytes: ByteArray = dbChainKey.privateKeyBytes,
@@ -102,7 +102,7 @@ suspend fun createTable(
 /**
  * 插入一条数据
  */
-suspend fun insertRow(
+fun insertRow(
     tableName: String,
     fields: Map<String, String>,
     privateKeyBytes: ByteArray = dbChainKey.privateKeyBytes,
@@ -121,7 +121,7 @@ suspend fun insertRow(
 /**
  * 冻结一条数据
  */
-suspend fun freezeRow(
+fun freezeRow(
     tableName: String,
     id: String,
     privateKeyBytes: ByteArray = dbChainKey.privateKeyBytes,
@@ -140,7 +140,7 @@ suspend fun freezeRow(
 /**
  * 调用函数
  */
-suspend fun callFunction(
+fun callFunction(
     functionName: String,
     argument: String,
     privateKeyBytes: ByteArray = dbChainKey.privateKeyBytes,
@@ -159,7 +159,7 @@ suspend fun callFunction(
 /**
  * 添加函数
  */
-suspend fun addFunction(
+fun addFunction(
     functionName: String,
     description: String,
     body: String,
@@ -179,7 +179,7 @@ suspend fun addFunction(
 /**
  * 删除函数
  */
-suspend fun dropFunction(
+fun dropFunction(
     functionName: String,
     privateKeyBytes: ByteArray = dbChainKey.privateKeyBytes,
     publicKeyBytes33: ByteArray = dbChainKey.publicKeyBytes33,
@@ -197,7 +197,7 @@ suspend fun dropFunction(
 /**
  * 查询数据
  */
-suspend fun querier(
+fun querier(
     queriedArray: QueriedArray,
     privateKeyBytes: ByteArray = dbChainKey.privateKeyBytes,
     publicKeyBytes33: ByteArray = dbChainKey.publicKeyBytes33
@@ -207,7 +207,7 @@ suspend fun querier(
             val json = queriedArray.toJson()
             return@sendRequestForReturn createService(baseUrl, ApiService::class.java)
                 .querier(createAccessToken(privateKeyBytes, publicKeyBytes33), appCode, base58Encode(json.toByteArray()))
-                .await()
+                .execute().body()
         }
     }, {
         it != null
@@ -218,7 +218,7 @@ suspend fun querier(
 /**
  * 查询数据的自定义函数
  */
-suspend fun querierFunction(
+fun querierFunction(
     apC: String = appCode,
     privateKeyBytes: ByteArray = dbChainKey.privateKeyBytes,
     publicKeyBytes33: ByteArray = dbChainKey.publicKeyBytes33,
@@ -243,7 +243,7 @@ suspend fun querierFunction(
                     function_name,
                     base58Encode(sb.toString().toByteArray())
                 )
-                .await()
+                .execute().body()
         }
     }, {
         it != null
@@ -254,14 +254,15 @@ suspend fun querierFunction(
 /**
  * 格式化请求体
  */
-private suspend fun formatRequestBodyJson(
+private fun formatRequestBodyJson(
     msgList: List<Message>,
     accountBean: BaseResponseDbChain<AccountBean>,
     privateKeyBytes: ByteArray,
     publicKeyBytes33: ByteArray
 ): String {
     val denomAmountList = sendRequestForReturn {
-        createService(baseUrl, ApiService::class.java).getMinGasPrices(createAccessToken(privateKeyBytes, publicKeyBytes33)).await().result
+        createService(baseUrl, ApiService::class.java).getMinGasPrices(createAccessToken(privateKeyBytes, publicKeyBytes33)).execute()
+            .body()?.result
     }
     val gas = msgList.size * defaultGasNumber
     if (denomAmountList != null && denomAmountList.isNotEmpty()) {
@@ -279,22 +280,22 @@ private suspend fun formatRequestBodyJson(
     return Gson().toJson(BodyBean(tx = signedTx))
 }
 
-private suspend inline fun createTransaction(
+private inline fun createTransaction(
     block: (accountBean: BaseResponseDbChain<AccountBean>) -> String,
     address: String
 ): QueryOperationResultBean? {
     return sendRequestForReturn {
         val apiService = createService(baseUrl, ApiService::class.java)
         // 获取account
-        val accountBean = apiService.getAccountAsync(address).await()
+        val accountBean = apiService.getAccountAsync(address).execute().body() ?: return null
         // 组装请求数据
         val broadcastBody = block(accountBean)
         // 插入成功返回的哈希
         val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), broadcastBody)
-        val txHashBean = apiService.insertAsync(requestBody).await()
+        val txHashBean = apiService.insertAsync(requestBody).execute().body()
         return@sendRequestForReturn loopHandleInTime({
             sendRequestForReturn inner@{
-                return@inner apiService.restGetAsync(txHashBean.txhash).await()
+                return@inner apiService.restGetAsync(txHashBean?.txhash ?: "").execute().body()
             }
         }, {
             it != null

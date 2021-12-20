@@ -1,8 +1,6 @@
 package com.gcigb.dbchain
 
-import kotlinx.coroutines.delay
-
-suspend inline fun <T> loopHandleInTime(handleBlock: () -> T?, checkCompleteBlock: (T?) -> Boolean, maxHandleSecond: Int = 10): T? {
+inline fun <T> loopHandleInTime(handleBlock: () -> T?, checkCompleteBlock: (T?) -> Boolean, maxHandleSecond: Int = 10): T? {
     var second = 0
     var data: T?
     var complete: Boolean
@@ -14,7 +12,7 @@ suspend inline fun <T> loopHandleInTime(handleBlock: () -> T?, checkCompleteBloc
         // 如果没有成功，则多等待一秒
         if (!complete) {
             second++
-            delay(1000)
+            Thread.sleep(1000)
         }
     } while (!complete && second < maxHandleSecond)
     return data
