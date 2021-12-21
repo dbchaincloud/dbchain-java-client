@@ -15,3 +15,4 @@
 local.properties
 /.idea/
 /java-client-sm2/
+/dbchain-java-client/out/
