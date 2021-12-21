@@ -18,20 +18,20 @@ fun createAccessToken(privateKeyBytes: ByteArray, publicKeyBytes33: ByteArray): 
 /**
  * 打一个积分
  */
-suspend fun requestAppUser(privateKeyBytes: ByteArray, publicKeyBytes33: ByteArray): DBChainQueryResult {
+fun requestAppUser(privateKeyBytes: ByteArray, publicKeyBytes33: ByteArray): DBChainQueryResult {
     val result = sendRequestForReturn {
         return@sendRequestForReturn createService(baseUrl, ApiService::class.java)
             .requestAppUser(createAccessToken(privateKeyBytes, publicKeyBytes33))
-            .await()
+            .execute()
     }
     return DBChainQueryResult(result?.isSuccessful ?: false, null)
 }
 
-suspend fun getToken(address: String): Int {
+fun getToken(address: String): Int {
     return sendRequestForReturn {
         val result = createService(baseUrl, ApiService::class.java)
             .getToken(address)
-            .await()
+            .execute().body() ?: return@sendRequestForReturn 0
 
         val coins = result.result.value.coins
         return run breaking@{
@@ -43,7 +43,7 @@ suspend fun getToken(address: String): Int {
     } ?: return 0
 }
 
-suspend fun checkTokenAvailable(privateKeyBytes: ByteArray, publicKeyBytes33: ByteArray, address: String): Boolean {
+fun checkTokenAvailable(privateKeyBytes: ByteArray, publicKeyBytes33: ByteArray, address: String): Boolean {
     //先查询是否有积分
     if (getToken(address) > 0) return true
     // 先去获取积分
